@@ -612,32 +612,21 @@
       });
 
       function initAuthAndLoadData() {
-        liff
-          .init({ liffId: LIFF_ID })
+        liff.init({ liffId: LIFF_ID })
           .then(() => {
             if (liff.isLoggedIn()) {
-              liff
-                .getProfile()
-                .then((profile) => {
-                  userState.lineUserId = profile.userId;
-                  checkUserPermissionOnServer(
-                    profile.userId,
-                    profile.displayName,
-                  );
-                })
-                .catch((err) => {
-                  fetchDashboardData();
-                });
-            } else {
-              if (liff.isInClient()) {
-                liff.login();
-              } else {
-                // หากเปิดผ่าน Browser นอก LINE จะโหลดแบบ Read-Only หรือให้กด Login เพิ่มเติมได้
+              liff.getProfile().then(profile => {
+                userState.lineUserId = profile.userId;
+                checkUserPermissionOnServer(profile.userId, profile.displayName);
+              }).catch(err => {
                 fetchDashboardData();
-              }
+              });
+            } else {
+              liff.login();
             }
           })
-          .catch((err) => {
+          .catch(err => {
+            console.log("LIFF Initialization failed", err);
             fetchDashboardData();
           });
       }
