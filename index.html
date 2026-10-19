@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>สรุปการใช้ยานยนต์ กองพันทหารสารวัตรที่ 31</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@400;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --military-dark: #1b2e18;
+      --military-green: #294424;
+      --military-green-light: #41643a;
+      --accent-gold: #cca028;
+      --emerald-green: #0f7a4a;
+      --emerald-light: #e8f5e9;
+      --amber-orange: #d97706;
+      --amber-light: #fef3c7;
+      --bg-page: #f2f4f1;
+      --card-bg: #ffffff;
+      --text-primary: #2d3748;
+    }
+
+    body {
+      font-family: 'Prompt', 'Sarabun', sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+      padding-bottom: 40px;
+    }
+
+    .dashboard-header {
+      background: linear-gradient(180deg, var(--military-dark) 0%, var(--military-green) 100%);
+      color: white;
+      padding: 24px 15px 24px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+      margin-bottom: 25px;
+      border-bottom: 4px solid var(--accent-gold);
+    }
+
+    .unit-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 18px;
+      border-radius: 50px;
+      border: 1px solid var(--accent-gold);
+      color: #f1c40f;
+      font-size: 0.88rem;
+      font-weight: 500;
+      background-color: rgba(0, 0, 0, 0.25);
+      margin-bottom: 10px;
+    }
+
+    .card {
+      border: none;
+      border-radius: 16px;
+      background: var(--card-bg);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+      margin-bottom: 20px;
+    }
+
+    .filter-section {
+      background: white;
+      padding: 22px;
+      border-radius: 16px;
+      margin-bottom: 25px;
+      border: 1px solid #ebf0e9;
+    }
+
+    .form-control,
+    .form-select {
+      border-radius: 10px;
+      border: 1px solid #d8e0d5;
+      padding: 9px 14px;
+      font-size: 0.92rem;
+    }
+
+    .form-control[readonly] {
+      background-color: #e9ecef;
+      cursor: not-allowed;
+      font-weight: 600;
+    }
+
+    .kpi-card-custom {
+      padding: 20px 22px;
+      border-radius: 16px;
+      background: white;
+      border: 1px solid #edf2ec;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .kpi-card-custom.kpi-trips {
+      border-left: 6px solid var(--military-green);
+    }
+
+    .kpi-card-custom.kpi-distance {
+      border-left: 6px solid var(--emerald-green);
+    }
+
+    .kpi-card-custom.kpi-fuel {
+      border-left: 6px solid var(--amber-orange);
+    }
+
+    .kpi-value {
+      font-size: 2.1rem;
+      font-weight: 700;
+    }
+
+    .kpi-trips .kpi-value {
+      color: var(--military-green);
+    }
+
+    .kpi-distance .kpi-value {
+      color: var(--emerald-green);
+    }
+
+    .kpi-fuel .kpi-value {
+      color: var(--amber-orange);
+    }
+
+    .chart-container {
+      position: relative;
+      height: 300px;
+      width: 100%;
+    }
+
+    #loadingOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(242, 244, 241, 0.95);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .table-container {
+      max-height: 420px;
+      overflow-y: auto;
+    }
+
+    thead th {
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+      background-color: #eef3ed !important;
+      color: var(--military-dark);
+      z-index: 1;
+      padding: 12px 16px;
+    }
+
+    tbody td {
+      white-space: nowrap;
+      padding: 12px 16px;
+      font-size: 0.88rem;
+    }
+
+    .badge-vehicle {
+      background-color: #f0f7ef;
+      color: var(--military-green);
+      border: 1px solid #cce3ca;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    .btn-edit {
+      padding: 3px 10px;
+      font-size: 0.8rem;
+      border-radius: 6px;
+      background-color: var(--amber-orange);
+      color: white;
+      border: none;
+    }
+
+    .btn-edit:hover {
+      background-color: #b45309;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="loadingOverlay">
+    <div class="spinner-border text-success" style="width: 3rem; height: 3rem;" role="status"></div>
+    <h5 class="mt-3 text-dark fw-semibold">กำลังโหลดข้อมูล...</h5>
+  </div>
+
+  <div class="dashboard-header text-center">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <span class="unit-badge"><i class="fa-solid fa-shield-halved me-1"></i> กองพันทหารสารวัตรที่ 31</span>
+      <span> </span>
+    </div>
+    <h3 class="fw-bold mb-1 text-white">
+      <i class="fa-solid fa-truck-monster me-2" style="color: var(--accent-gold);"></i>ระบบจัดการและรายงานการใช้ยานยนต์
+    </h3>
+  </div>
+
+  <div class="container-fluid" style="max-width: 1240px;">
+
+    <div class="filter-section">
+      <h6 class="fw-bold mb-3 text-success"><i class="fa-solid fa-sliders me-2"></i>ตัวกรองข้อมูล</h6>
+      <div class="row g-3">
+        <div class="col-md-3 col-6">
+          <label class="form-label small text-muted">ตั้งแต่วันที่</label>
+          <input type="date" id="filterStartDate" class="form-control" onchange="applyFilters()">
+        </div>
+        <div class="col-md-3 col-6">
+          <label class="form-label small text-muted">ถึงวันที่</label>
+          <input type="date" id="filterEndDate" class="form-control" onchange="applyFilters()">
+        </div>
+        <div class="col-md-3 col-12">
+          <label class="form-label small text-muted">เลือกคันรถ</label>
+          <select id="filterVehicle" class="form-select" onchange="applyFilters()">
+            <option value="ALL">รวมทุกคัน</option>
+          </select>
+        </div>
+        <div class="col-md-3 col-12">
+          <label class="form-label small text-muted">ค้นหาสถานที่</label>
+          <input type="text" id="filterLocation" class="form-control" placeholder="พิมพ์ชื่อสถานที่..." onkeyup="applyFilters()">
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-2">
+      <div class="col-md-4 col-12">
+        <div class="card kpi-card-custom kpi-trips">
+          <div>
+            <div class="small text-muted">จำนวนการใช้งาน</div>
+            <div class="kpi-value" id="kpiTrips">0 </div>
+            <div class="fs-6 text-muted fw-normal">รอบ</div>
+          </div>
+          <div class="fs-2 text-success"><i class="fa-solid fa-route"></i></div>
+        </div>
+      </div>
+      <div class="col-md-4 col-6">
+        <div class="card kpi-card-custom kpi-distance">
+          <div>
+            <div class="small text-muted">ระยะทางรวม</div>
+            <div class="kpi-value" id="kpiDistance">0 </div>
+            <div class="fs-6 text-muted fw-normal">กม.</div>
+          </div>
+          <div class="fs-2 text-success"><i class="fa-solid fa-gauge-high"></i></div>
+        </div>
+      </div>
+      <div class="col-md-4 col-6">
+        <div class="card kpi-card-custom kpi-fuel">
+          <div>
+            <div class="small text-muted">น้ำมันเชื้อเพลิงรวม</div>
+            <div class="kpi-value" id="kpiFuel">0 </div>
+            <div class="fs-6 text-muted fw-normal">ลิตร</div>
+          </div>
+          <div class="fs-2 text-warning"><i class="fa-solid fa-gas-pump"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-md-8 col-12">
+        <div class="card p-3 h-100">
+          <h6 class="fw-bold mb-3 text-dark"><i class="fa-solid fa-chart-column me-2"></i>ระยะทางแยกตามรถ (กิโลเมตร)</h6>
+          <div class="chart-container"><canvas id="vehicleChart"></canvas></div>
+        </div>
+      </div>
+      <div class="col-md-4 col-12">
+        <div class="card p-3 h-100">
+          <h6 class="fw-bold mb-3 text-dark"><i class="fa-solid fa-chart-pie me-2"></i>5 อันดับ สถานที่เดินทางบ่อย</h6>
+          <div class="chart-container"><canvas id="locationChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-3">
+      <div class="col-12">
+        <div class="card p-3">
+          <h6 class="fw-bold mb-3"><i class="fa-solid fa-list-ul me-2"></i>รายละเอียดการใช้รถ</h6>
+          <div class="table-responsive table-container">
+            <table class="table table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>วันที่</th>
+                  <th>เวลา ออก-เข้า</th>
+                  <th>ทะเบียนรถ</th>
+                  <th>พลขับ</th>
+                  <th>สถานที่</th>
+                  <th class="text-end">ระยะทาง (กม.)</th>
+                  <th class="text-end">น้ำมัน (ลิตร)</th>
+                  <th class="text-center">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+            <small class="text-muted" id="paginationInfo">แสดง 0 ถึง 0 จากทั้งหมด 0 รายการ</small>
+            <nav>
+              <ul class="pagination pagination-sm mb-0" id="paginationNav"></ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content" style="border-radius: 16px;">
+        <div class="modal-header bg-dark text-white" style="border-radius: 16px 16px 0 0;">
+          <h6 class="modal-title fw-bold">
+            <i class="fa-solid fa-pen-to-square me-2 text-warning"></i>แก้ไขข้อมูลการใช้ยานยนต์
+          </h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editForm">
+            <input type="hidden" id="editSheetName">
+            <input type="hidden" id="editRowIndex">
+
+            <div class="row g-2">
+              <div class="col-md-6 col-12 mb-2">
+                <label class="form-label small">วันที่ใช้งาน (dd/mm/yyyy)</label>
+                <input type="text" id="editDate" class="form-control" required>
+              </div>
+              <div class="col-md-6 col-12 mb-2">
+                <label class="form-label small">ชนิดรถ / ทะเบียนหมายเลข <span class="text-danger">*</span></label>
+                <input class="form-control" list="vehicleList" id="editVehicle" placeholder="เลือกหรือพิมพ์ค้นหา..." required oninput="calculateDistanceAndFuel()">
+                <datalist id="vehicleList">
+                  <!-- โหลดข้อมูลอัตโนมัติจาก Google Sheets API -->
+                </datalist>
+              </div>
+
+              <div class="col-12 mb-2">
+                <label class="form-label small">ยศ นาม (พลขับ) <span class="text-danger">*</span></label>
+                <input class="form-control" list="driverList" id="editDriver" placeholder="เลือกจากรายการ หรือพิมพ์เพิ่ม..." required>
+                <datalist id="driverList">
+                  <!-- โหลดข้อมูลอัตโนมัติจาก Google Sheets API -->
+                </datalist>
+              </div>
+
+              <div class="col-12 mb-2">
+                <label class="form-label small">สถานที่ปฏิบัติภารกิจ / ตำบลเดินทาง</label>
+                <input type="text" id="editDestinations" class="form-control">
+              </div>
+
+              <div class="col-6 mb-2">
+                <label class="form-label small">เวลาออก</label>
+                <input type="text" id="editTimeOut" class="form-control" placeholder="08:00">
+              </div>
+              <div class="col-6 mb-2">
+                <label class="form-label small">เวลากลับ</label>
+                <input type="text" id="editTimeIn" class="form-control" placeholder="16:30">
+              </div>
+
+              <div class="col-6 mb-2">
+                <label class="form-label small">เลขไมล์ออก (km) <span class="text-danger">*</span></label>
+                <input type="number" step="any" id="editMileOut" class="form-control" required oninput="calculateDistanceAndFuel()">
+              </div>
+              <div class="col-6 mb-2">
+                <label class="form-label small">เลขไมล์เข้า (km) <span class="text-danger">*</span></label>
+                <input type="number" step="any" id="editMileIn" class="form-control" required oninput="calculateDistanceAndFuel()">
+              </div>
+
+              <div class="col-6 mb-2">
+                <label class="form-label small fw-semibold text-success">ระยะทางคำนวณอัตโนมัติ (km)</label>
+                <input type="number" id="editDistance" class="form-control text-success" readonly placeholder="คำนวณอัตโนมัติ">
+              </div>
+              <div class="col-6 mb-2">
+                <label class="form-label small fw-semibold text-warning">ปริมาณน้ำมันคำนวณอัตโนมัติ (ลิตร)</label>
+                <input type="number" id="editFuel" class="form-control text-warning" readonly placeholder="คำนวณอัตโนมัติ">
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">ยกเลิก</button>
+          <button type="button" class="btn btn-sm btn-success px-3" onclick="submitEditData()"><i class="fa-solid fa-floppy-disk me-1"></i>บันทึกข้อมูล</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbzkfp8FYbZrJcWEjzG7uEnEMl70pHB3d6gyIxc9ZZKzel6f5KZ1Jm3e32WBYCg-PKqB/exec";
+
+    let FUEL_CONSUMPTION_RATES = {};
+    let chartVehicle = null;
+    let chartLocation = null;
+    let rawData = [];
+    let currentFilteredData = [];
+    let currentSortedData = [];
+    let currentPage = 1;
+    const itemsPerPage = 25;
+
+    const chartColors = ['#294424', '#0f7a4a', '#d97706', '#207561', '#cca028', '#4a6b3f', '#e67e22'];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const today = new Date();
+      document.getElementById('filterEndDate').value = today.toISOString().split('T')[0];
+      fetchDashboardData();
+    });
+
+    // ดึงข้อมูลผ่าน Fetch API (GET) จาก GAS Backend
+    function fetchDashboardData() {
+      fetch(API_URL)
+        .then(response => response.json())
+        .then(response => {
+          onDataReceived(response);
+        })
+        .catch(error => {
+          document.getElementById('loadingOverlay').style.display = 'none';
+          alert("เกิดข้อผิดพลาดในการเชื่อมต่อ API: " + error.message);
+        });
+    }
+
+    function onDataReceived(response) {
+      if(response.status === "success") {
+        rawData = response.data;
+        
+        FUEL_CONSUMPTION_RATES = response.vehicleMap || {};
+        populateDatalist('vehicleList', response.vehicleOptions || []);
+        populateDatalist('driverList', response.driverList || []);
+
+        populateVehicleDropdown();
+        setDefaultStartDate();
+        applyFilters();
+        document.getElementById('loadingOverlay').style.display = 'none';
+      } else {
+        alert("เกิดข้อผิดพลาด: " + response.message);
+      }
+    }
+
+    function populateDatalist(elementId, items) {
+      const datalist = document.getElementById(elementId);
+      datalist.innerHTML = '';
+      items.forEach(item => {
+        let opt = document.createElement('option');
+        opt.value = item;
+        datalist.appendChild(opt);
+      });
+    }
+
+    function setDefaultStartDate() {
+      if (!rawData || rawData.length === 0) return;
+      let oldestTime = Infinity;
+      let oldestDateObj = null;
+      rawData.forEach(item => {
+        if (item.dateStr) {
+          const d = parseDateStr(item.dateStr);
+          const t = d.getTime();
+          if (!isNaN(t) && t > 0 && t < oldestTime) {
+            oldestTime = t;
+            oldestDateObj = d;
+          }
+        }
+      });
+      if (oldestDateObj && oldestTime !== Infinity) {
+        document.getElementById('filterStartDate').value = oldestDateObj.toISOString().split('T')[0];
+      }
+    }
+
+    function parseFilterDate(dateStr) {
+      if (!dateStr) return null;
+      const parts = dateStr.split('-');
+      if (parts.length === 3) {
+        return new Date(parts[0], parts[1] - 1, parts[2]);
+      }
+      return new Date(dateStr);
+    }
+
+    function applyFilters() {
+      const startInput = document.getElementById('filterStartDate').value;
+      const endInput = document.getElementById('filterEndDate').value;
+      const vehicleInput = document.getElementById('filterVehicle').value;
+      const locationInput = document.getElementById('filterLocation').value.toLowerCase().trim();
+
+      const startDate = parseFilterDate(startInput);
+      if (startDate) startDate.setHours(0,0,0,0);
+
+      const endDate = parseFilterDate(endInput);
+      if (endDate) endDate.setHours(23,59,59,999);
+
+      const filteredData = rawData.filter(item => {
+        const itemDate = parseDateStr(item.dateStr);
+        let matchDate = (itemDate >= startDate && itemDate <= endDate);
+        let matchVehicle = (vehicleInput === "ALL") || (item.vehicle === vehicleInput);
+        let matchLocation = locationInput ? item.destinations.toLowerCase().includes(locationInput) : true;
+        return matchDate && matchVehicle && matchLocation;
+      });
+
+      updateDashboard(filteredData);
+    }
+
+    function populateVehicleDropdown() {
+      const select = document.getElementById('filterVehicle');
+      select.innerHTML = '<option value="ALL">รวมทุกคัน</option>';
+      const vehicles = [...new Set(rawData.map(item => item.vehicle))].filter(v => v !== "");
+      vehicles.forEach(v => {
+        let opt = document.createElement('option');
+        opt.value = v; opt.innerText = v;
+        select.appendChild(opt);
+      });
+    }
+
+    function parseDateStr(dateStr) {
+      if(!dateStr) return new Date(0);
+      const parts = dateStr.split('/');
+      if(parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]);
+      return new Date(dateStr);
+    }
+
+    function updateDashboard(data) {
+      let totalTrips = data.length;
+      let totalDistance = 0;
+      let totalFuel = 0;
+      const vehicleSummary = {};
+      const locationSummary = {};
+
+      data.forEach(item => {
+        totalDistance += item.distance;
+        totalFuel += item.fuel;
+
+        if (item.vehicle) vehicleSummary[item.vehicle] = (vehicleSummary[item.vehicle] || 0) + item.distance;
+        if (item.destinations) {
+          item.destinations.split(',').forEach(d => {
+            let clean = d.trim();
+            if(clean) locationSummary[clean] = (locationSummary[clean] || 0) + 1;
+          });
+        }
+      });
+
+      document.getElementById('kpiTrips').innerText = totalTrips.toLocaleString();
+      document.getElementById('kpiDistance').innerText = totalDistance.toLocaleString(undefined, {maximumFractionDigits: 1});
+      document.getElementById('kpiFuel').innerText = totalFuel.toLocaleString(undefined, {maximumFractionDigits: 2});
+
+      renderVehicleChart(vehicleSummary);
+      renderLocationChart(locationSummary);
+
+      currentFilteredData = data;
+      currentPage = 1;
+      renderTableAndPagination();
+    }
+
+    function renderTableAndPagination() {
+      currentSortedData = [...currentFilteredData].sort((a, b) => {
+        const dateA = parseDateStr(a.dateStr).getTime();
+        const dateB = parseDateStr(b.dateStr).getTime();
+        if (dateA !== dateB) return dateB - dateA;
+        return (b.timeOut || "").localeCompare(a.timeOut || "");
+      });
+
+      const totalItems = currentSortedData.length;
+      const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+      if (currentPage > totalPages) currentPage = totalPages;
+
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+      const pageData = currentSortedData.slice(startIndex, endIndex);
+
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+
+      if (totalItems === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">ไม่พบข้อมูลในเงื่อนไขที่เลือก</td></tr>';
+      } else {
+        pageData.forEach((item, index) => {
+          const globalIdx = startIndex + index;
+          const timeDisplay = (item.timeOut && item.timeIn) ? `${item.timeOut} - ${item.timeIn}` : '-';
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${item.dateStr}</td>
+            <td><small class="text-muted">${timeDisplay}</small></td>
+            <td><span class="badge-vehicle">${item.vehicle}</span></td>
+            <td>${item.driver || '-'}</td>
+            <td><small>${item.destinations || '-'}</small></td>
+            <td class="text-end fw-semibold text-success">${item.distance.toLocaleString()}</td>
+            <td class="text-end fw-semibold text-warning">${item.fuel.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="text-center">
+              <button class="btn-edit" onclick="openEditModal(${globalIdx})"><i class="fa-solid fa-pen me-1"></i>แก้ไข</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      renderPaginationControls(totalItems, startIndex, endIndex, totalPages);
+    }
+
+    function renderPaginationControls(totalItems, startIndex, endIndex, totalPages) {
+      const info = document.getElementById('paginationInfo');
+      const nav = document.getElementById('paginationNav');
+
+      if (totalItems === 0) {
+        info.innerText = 'แสดง 0 จากทั้งหมด 0 รายการ';
+        nav.innerHTML = '';
+        return;
+      }
+
+      info.innerText = `แสดง ${startIndex + 1} ถึง ${endIndex} จากทั้งหมด ${totalItems} รายการ`;
+
+      let navHtml = `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+        <a class="page-link" href="#" onclick="changePage(${currentPage - 1}); return false;">ย้อนกลับ</a></li>`;
+
+      let startPage = Math.max(1, currentPage - 2);
+      let endPage = Math.min(totalPages, startPage + 4);
+
+      for (let p = startPage; p <= endPage; p++) {
+        navHtml += `<li class="page-item ${p === currentPage ? 'active' : ''}">
+          <a class="page-link" href="#" onclick="changePage(${p}); return false;">${p}</a></li>`;
+      }
+
+      navHtml += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+        <a class="page-link" href="#" onclick="changePage(${currentPage + 1}); return false;">ถัดไป</a></li>`;
+
+      nav.innerHTML = navHtml;
+    }
+
+    function changePage(newPage) {
+      currentPage = newPage;
+      renderTableAndPagination();
+    }
+
+    function calculateDistanceAndFuel() {
+      const mileOut = parseFloat(document.getElementById('editMileOut').value) || 0;
+      const mileIn = parseFloat(document.getElementById('editMileIn').value) || 0;
+      const vehicleName = document.getElementById('editVehicle').value ? document.getElementById('editVehicle').value.trim() : "";
+
+      let distance = 0;
+      if (mileIn > mileOut && mileOut > 0) {
+        distance = mileIn - mileOut;
+      } else if (mileIn > 0 && mileOut === 0) {
+        distance = mileIn;
+      }
+
+      let consumptionRate = 0;
+      if (vehicleName in FUEL_CONSUMPTION_RATES) {
+        consumptionRate = FUEL_CONSUMPTION_RATES[vehicleName];
+      } else {
+        for (const key in FUEL_CONSUMPTION_RATES) {
+          if (vehicleName !== "" && (key.includes(vehicleName) || vehicleName.includes(key))) {
+            consumptionRate = FUEL_CONSUMPTION_RATES[key];
+            break;
+          }
+        }
+      }
+
+      let fuel = 0;
+      if (consumptionRate > 0 && distance > 0) {
+        fuel = Number((distance / consumptionRate).toFixed(2));
+      }
+
+      document.getElementById('editDistance').value = distance;
+      document.getElementById('editFuel').value = fuel;
+    }
+
+    function openEditModal(sortedIdx) {
+      const item = currentSortedData[sortedIdx];
+      if (!item) return;
+
+      document.getElementById('editSheetName').value = item.sheetName;
+      document.getElementById('editRowIndex').value = item.rowIndex;
+      document.getElementById('editDate').value = item.dateStr;
+      document.getElementById('editVehicle').value = item.vehicle;
+      document.getElementById('editDriver').value = item.driver;
+      document.getElementById('editDestinations').value = item.destinations;
+      document.getElementById('editTimeOut').value = item.timeOut;
+      document.getElementById('editTimeIn').value = item.timeIn;
+      document.getElementById('editMileOut').value = item.mileOut || "";
+      document.getElementById('editMileIn').value = item.mileIn || "";
+
+      calculateDistanceAndFuel();
+
+      const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+      editModal.show();
+    }
+
+    // ส่งข้อมูลอัปเดตผ่าน Fetch API (POST) ไปยัง GAS Backend
+    function submitEditData() {
+      const payload = {
+        action: "updateRecord",
+        sheetName: document.getElementById('editSheetName').value,
+        rowIndex: Number(document.getElementById('editRowIndex').value),
+        dateStr: document.getElementById('editDate').value,
+        vehicle: document.getElementById('editVehicle').value,
+        driver: document.getElementById('editDriver').value,
+        destinations: document.getElementById('editDestinations').value,
+        timeOut: document.getElementById('editTimeOut').value,
+        timeIn: document.getElementById('editTimeIn').value,
+        mileOut: document.getElementById('editMileOut').value,
+        mileIn: document.getElementById('editMileIn').value,
+        distance: document.getElementById('editDistance').value,
+        fuel: document.getElementById('editFuel').value
+      };
+
+      document.getElementById('loadingOverlay').style.display = 'flex';
+
+      fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify(payload)
+      })
+      .then(response => response.json())
+      .then(res => {
+        document.getElementById('loadingOverlay').style.display = 'none';
+        if (res.status === "success") {
+          bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+          fetchDashboardData();
+        } else {
+          alert("เกิดข้อผิดพลาด: " + res.message);
+        }
+      })
+      .catch(error => {
+        document.getElementById('loadingOverlay').style.display = 'none';
+        alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล: " + error.message);
+      });
+    }
+
+    function renderVehicleChart(summaryObj) {
+      const ctx = document.getElementById('vehicleChart').getContext('2d');
+      const sorted = Object.entries(summaryObj).sort((a, b) => b[1] - a[1]);
+      if (chartVehicle) chartVehicle.destroy();
+
+      chartVehicle = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: sorted.map(i => i[0]),
+          datasets: [{ label: 'ระยะทาง (กม.)', data: sorted.map(i => i[1]), backgroundColor: '#294424', borderRadius: 8 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+      });
+    }
+
+    function renderLocationChart(summaryObj) {
+      const ctx = document.getElementById('locationChart').getContext('2d');
+      const sorted = Object.entries(summaryObj).sort((a, b) => b[1] - a[1]).slice(0, 5);
+      if (chartLocation) chartLocation.destroy();
+
+      chartLocation = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: sorted.map(i => i[0]),
+          datasets: [{ data: sorted.map(i => i[1]), backgroundColor: chartColors }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '65%' }
+      });
+    }
+  </script>
+
+</body>
+
+</html>
