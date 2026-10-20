@@ -574,7 +574,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-      const API_URL = "https://script.google.com/macros/s/AKfycbxWxd2_3z3JEeBMBaxkzCP7S2fhnWRa887o3hsoB8leKqOqNsT8H-hU57hT3X6Apm3R/exec";
+      const API_URL = "https://script.google.com/macros/s/AKfycbzW31Maw218AsWub36BCV3D1RPLzndXvp_Y9Ss_3U2b2TNgkeUlQParL-ZrknlZOcZ7/exec";
       const LIFF_ID = "2012018514-L8178qoX";
 
       let FUEL_CONSUMPTION_RATES = {};
@@ -632,14 +632,9 @@
       }
 
       function checkUserPermissionOnServer(userId, displayName) {
-        fetch(API_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            action: "checkPermission",
-            lineUserId: userId,
-            name: displayName,
-          }),
-        })
+        const url = `${API_URL}?action=checkPermission&lineUserId=${encodeURIComponent(userId)}&name=${encodeURIComponent(displayName)}`;
+  
+        fetch(url)
           .then((res) => res.json())
           .then((res) => {
             if (res.status === "success") {
@@ -982,28 +977,24 @@
       }
 
       function submitEditData() {
-        const payload = {
-          action: "updateRecord",
-          sheetName: document.getElementById("editSheetName").value,
-          rowIndex: Number(document.getElementById("editRowIndex").value),
-          dateStr: document.getElementById("editDate").value,
-          vehicle: document.getElementById("editVehicle").value,
-          driver: document.getElementById("editDriver").value,
-          destinations: document.getElementById("editDestinations").value,
-          timeOut: document.getElementById("editTimeOut").value,
-          timeIn: document.getElementById("editTimeIn").value,
-          mileOut: document.getElementById("editMileOut").value,
-          mileIn: document.getElementById("editMileIn").value,
-          distance: document.getElementById("editDistance").value,
-          fuel: document.getElementById("editFuel").value,
-        };
-
+        const sheetName = encodeURIComponent(document.getElementById("editSheetName").value);
+        const rowIndex = encodeURIComponent(document.getElementById("editRowIndex").value);
+        const dateStr = encodeURIComponent(document.getElementById("editDate").value);
+        const vehicle = encodeURIComponent(document.getElementById("editVehicle").value);
+        const driver = encodeURIComponent(document.getElementById("editDriver").value);
+        const destinations = encodeURIComponent(document.getElementById("editDestinations").value);
+        const timeOut = encodeURIComponent(document.getElementById("editTimeOut").value);
+        const timeIn = encodeURIComponent(document.getElementById("editTimeIn").value);
+        const mileOut = encodeURIComponent(document.getElementById("editMileOut").value);
+        const mileIn = encodeURIComponent(document.getElementById("editMileIn").value);
+        const distance = encodeURIComponent(document.getElementById("editDistance").value);
+        const fuel = encodeURIComponent(document.getElementById("editFuel").value);
+  
+        const url = `${API_URL}?action=updateRecord&sheetName=${sheetName}&rowIndex=${rowIndex}&dateStr=${dateStr}&vehicle=${vehicle}&driver=${driver}&destinations=${destinations}&timeOut=${timeOut}&timeIn=${timeIn}&mileOut=${mileOut}&mileIn=${mileIn}&distance=${distance}&fuel=${fuel}`;
+  
         document.getElementById("loadingOverlay").style.display = "flex";
-
-        fetch(API_URL, {
-          method: "POST",
-          body: JSON.stringify(payload),
-        })
+  
+        fetch(url)
           .then((response) => response.json())
           .then((res) => {
             document.getElementById("loadingOverlay").style.display = "none";
@@ -1021,7 +1012,7 @@
             alert("เกิดข้อผิดพลาดในการบันทึก: " + error.message);
           });
       }
-
+      
       function renderVehicleChart(summaryObj) {
         const ctx = document.getElementById("vehicleChart").getContext("2d");
         const sorted = Object.entries(summaryObj).sort((a, b) => b[1] - a[1]);
