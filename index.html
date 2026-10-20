@@ -223,9 +223,7 @@
         style="width: 3rem; height: 3rem"
         role="status"
       ></div>
-      <h5 class="mt-3 text-dark fw-semibold">
-        กำลังตรวจสอบสิทธิ์และโหลดข้อมูล...
-      </h5>
+      <h5 class="mt-3 text-dark fw-semibold">กำลังโหลดข้อมูลแดชบอร์ด...</h5>
     </div>
 
     <div class="dashboard-header text-center">
@@ -574,7 +572,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-      const API_URL = "https://script.google.com/macros/s/AKfycbzW31Maw218AsWub36BCV3D1RPLzndXvp_Y9Ss_3U2b2TNgkeUlQParL-ZrknlZOcZ7/exec";
+      const API_URL =
+        "https://script.google.com/macros/s/AKfycbybki6qA9Xt0TxazrM8rtGNBc_41BSCU_QkA7yjgqm_q9BjwTa4VZRAILRr3h4cwOlq/exec";
       const LIFF_ID = "2012018514-L8178qoX";
 
       let FUEL_CONSUMPTION_RATES = {};
@@ -611,56 +610,39 @@
         initAuthAndLoadData();
       });
 
+      // ดึงข้อมูลโปรไฟล์ LINE พร้อมๆ กับการโหลด Dashboard ครั้งเดียว
       function initAuthAndLoadData() {
-        liff.init({ liffId: LIFF_ID })
+        liff
+          .init({ liffId: LIFF_ID })
           .then(() => {
             if (liff.isLoggedIn()) {
-              liff.getProfile().then(profile => {
-                userState.lineUserId = profile.userId;
-                checkUserPermissionOnServer(profile.userId, profile.displayName);
-              }).catch(err => {
-                fetchDashboardData();
-              });
+              liff
+                .getProfile()
+                .then((profile) => {
+                  userState.lineUserId = profile.userId;
+                  fetchDashboardData(profile.userId, profile.displayName);
+                })
+                .catch((err) => {
+                  fetchDashboardData();
+                });
             } else {
               liff.login();
             }
           })
-          .catch(err => {
+          .catch((err) => {
             console.log("LIFF Initialization failed", err);
             fetchDashboardData();
           });
       }
 
-      function checkUserPermissionOnServer(userId, displayName) {
-        const url = `${API_URL}?action=checkPermission&lineUserId=${encodeURIComponent(userId)}&name=${encodeURIComponent(displayName)}`;
-  
-        fetch(url)
-          .then((res) => res.json())
-          .then((res) => {
-            if (res.status === "success") {
-              userState.canEdit = res.canEdit;
-              if (res.user) {
-                userState.name = res.user.name;
-                userState.role = res.user.role;
-                document.getElementById("lblUserName").innerText =
-                  `${res.user.name} (${res.user.role})`;
-                document
-                  .getElementById("userProfileTag")
-                  .classList.remove("d-none");
-              }
-              if (res.canEdit) {
-                document.getElementById("thAction").classList.remove("d-none");
-              }
-            }
-            fetchDashboardData();
-          })
-          .catch((err) => {
-            fetchDashboardData();
-          });
-      }
+      // ส่ง Request ครั้งเดียวได้ทั้งข้อมูล Dashboard และ สิทธิ์
+      function fetchDashboardData(userId = "", displayName = "") {
+        let url = API_URL;
+        if (userId) {
+          url += `?lineUserId=${encodeURIComponent(userId)}&name=${encodeURIComponent(displayName)}`;
+        }
 
-      function fetchDashboardData() {
-        fetch(API_URL)
+        fetch(url)
           .then((response) => response.json())
           .then((response) => {
             onDataReceived(response);
@@ -674,6 +656,23 @@
       function onDataReceived(response) {
         if (response.status === "success") {
           rawData = response.data;
+
+          // แสดงสิทธิ์การแก้ไขข้อมูล
+          if (response.canEdit !== undefined) {
+            userState.canEdit = response.canEdit;
+            if (response.user) {
+              userState.name = response.user.name;
+              userState.role = response.user.role;
+              document.getElementById("lblUserName").innerText =
+                `${response.user.name} (${response.user.role})`;
+              document
+                .getElementById("userProfileTag")
+                .classList.remove("d-none");
+            }
+            if (response.canEdit) {
+              document.getElementById("thAction").classList.remove("d-none");
+            }
+          }
 
           FUEL_CONSUMPTION_RATES = response.vehicleMap || {};
           populateDatalist("vehicleList", response.vehicleOptions || []);
@@ -977,23 +976,47 @@
       }
 
       function submitEditData() {
-        const sheetName = encodeURIComponent(document.getElementById("editSheetName").value);
-        const rowIndex = encodeURIComponent(document.getElementById("editRowIndex").value);
-        const dateStr = encodeURIComponent(document.getElementById("editDate").value);
-        const vehicle = encodeURIComponent(document.getElementById("editVehicle").value);
-        const driver = encodeURIComponent(document.getElementById("editDriver").value);
-        const destinations = encodeURIComponent(document.getElementById("editDestinations").value);
-        const timeOut = encodeURIComponent(document.getElementById("editTimeOut").value);
-        const timeIn = encodeURIComponent(document.getElementById("editTimeIn").value);
-        const mileOut = encodeURIComponent(document.getElementById("editMileOut").value);
-        const mileIn = encodeURIComponent(document.getElementById("editMileIn").value);
-        const distance = encodeURIComponent(document.getElementById("editDistance").value);
-        const fuel = encodeURIComponent(document.getElementById("editFuel").value);
-  
+        const sheetName = encodeURIComponent(
+          document.getElementById("editSheetName").value,
+        );
+        const rowIndex = encodeURIComponent(
+          document.getElementById("editRowIndex").value,
+        );
+        const dateStr = encodeURIComponent(
+          document.getElementById("editDate").value,
+        );
+        const vehicle = encodeURIComponent(
+          document.getElementById("editVehicle").value,
+        );
+        const driver = encodeURIComponent(
+          document.getElementById("editDriver").value,
+        );
+        const destinations = encodeURIComponent(
+          document.getElementById("editDestinations").value,
+        );
+        const timeOut = encodeURIComponent(
+          document.getElementById("editTimeOut").value,
+        );
+        const timeIn = encodeURIComponent(
+          document.getElementById("editTimeIn").value,
+        );
+        const mileOut = encodeURIComponent(
+          document.getElementById("editMileOut").value,
+        );
+        const mileIn = encodeURIComponent(
+          document.getElementById("editMileIn").value,
+        );
+        const distance = encodeURIComponent(
+          document.getElementById("editDistance").value,
+        );
+        const fuel = encodeURIComponent(
+          document.getElementById("editFuel").value,
+        );
+
         const url = `${API_URL}?action=updateRecord&sheetName=${sheetName}&rowIndex=${rowIndex}&dateStr=${dateStr}&vehicle=${vehicle}&driver=${driver}&destinations=${destinations}&timeOut=${timeOut}&timeIn=${timeIn}&mileOut=${mileOut}&mileIn=${mileIn}&distance=${distance}&fuel=${fuel}`;
-  
+
         document.getElementById("loadingOverlay").style.display = "flex";
-  
+
         fetch(url)
           .then((response) => response.json())
           .then((res) => {
@@ -1002,7 +1025,7 @@
               bootstrap.Modal.getInstance(
                 document.getElementById("editModal"),
               ).hide();
-              fetchDashboardData();
+              fetchDashboardData(userState.lineUserId, userState.name);
             } else {
               alert("เกิดข้อผิดพลาด: " + res.message);
             }
@@ -1012,7 +1035,7 @@
             alert("เกิดข้อผิดพลาดในการบันทึก: " + error.message);
           });
       }
-      
+
       function renderVehicleChart(summaryObj) {
         const ctx = document.getElementById("vehicleChart").getContext("2d");
         const sorted = Object.entries(summaryObj).sort((a, b) => b[1] - a[1]);
