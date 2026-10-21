@@ -244,36 +244,6 @@
         </div>
       </div>
 
-      <!-- ADMIN DASHBOARD HEADER -->
-      <div id="adminDashboardView" class="admin-view">
-        <div class="dashboard-header admin-header text-center">
-          <div
-            class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-3 gap-2 container-fluid"
-            style="max-width: 1240px"
-          >
-            <span
-              class="unit-badge mb-0"
-              style="border-color: var(--accent-gold)"
-            >
-              <i class="fa-solid fa-lock me-1"></i> ผู้ดูแลระบบ (Admin Panel)
-            </span>
-            <button
-              class="btn btn-outline-light btn-sm fw-semibold w-100 w-md-auto shadow-sm"
-              onclick="switchView('main')"
-            >
-              <i class="fa-solid fa-arrow-left me-1"></i> กลับหน้าแดชบอร์ดหลัก
-            </button>
-          </div>
-          <h3 class="fw-bold mb-1 text-white">
-            <i
-              class="fa-solid fa-gear me-2"
-              style="color: var(--accent-gold)"
-            ></i
-            >ระบบจัดการฐานข้อมูลผู้ดูแลระบบ
-          </h3>
-        </div>
-      </div>
-
       <div class="container-fluid" style="max-width: 1240px">
         <div class="filter-section">
           <h6 class="fw-bold mb-3 text-success">
@@ -432,15 +402,17 @@
     <div id="adminDashboardView" class="admin-view">
       <div class="dashboard-header admin-header text-center">
         <div
-          class="d-flex align-items-center justify-content-between mb-2 container-fluid"
+          class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-3 gap-2 container-fluid"
           style="max-width: 1240px"
         >
-          <span class="unit-badge" style="border-color: var(--accent-gold)"
-            ><i class="fa-solid fa-lock me-1"></i> ผู้ดูแลระบบ (Admin
-            Panel)</span
+          <span
+            class="unit-badge mb-0"
+            style="border-color: var(--accent-gold)"
           >
+            <i class="fa-solid fa-lock me-1"></i> ผู้ดูแลระบบ (Admin Panel)
+          </span>
           <button
-            class="btn btn-outline-light btn-sm fw-semibold"
+            class="btn btn-outline-light btn-sm fw-semibold w-100 w-md-auto shadow-sm"
             onclick="switchView('main')"
           >
             <i class="fa-solid fa-arrow-left me-1"></i> กลับหน้าแดชบอร์ดหลัก
@@ -1111,7 +1083,6 @@
         });
       }
 
-      // ส่วนฟังก์ชันหลัก Dashboard (Filter, Chart, Pagination)
       function populateDatalist(elementId, items) {
         const datalist = document.getElementById(elementId);
         datalist.innerHTML = "";
