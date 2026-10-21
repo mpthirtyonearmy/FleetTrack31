@@ -17,6 +17,8 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- LIFF SDK -->
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
@@ -27,9 +29,7 @@
         --military-green-light: #41643a;
         --accent-gold: #cca028;
         --emerald-green: #0f7a4a;
-        --emerald-light: #e8f5e9;
         --amber-orange: #d97706;
-        --amber-light: #fef3c7;
         --bg-page: #f2f4f1;
         --card-bg: #ffffff;
         --text-primary: #2d3748;
@@ -66,7 +66,6 @@
         font-size: 0.88rem;
         font-weight: 500;
         background-color: rgba(0, 0, 0, 0.25);
-        margin-bottom: 10px;
       }
 
       .user-profile-badge {
@@ -105,12 +104,6 @@
         font-size: 0.92rem;
       }
 
-      .form-control[readonly] {
-        background-color: #e9ecef;
-        cursor: not-allowed;
-        font-weight: 600;
-      }
-
       .kpi-card-custom {
         padding: 20px 22px;
         border-radius: 16px;
@@ -124,11 +117,9 @@
       .kpi-card-custom.kpi-trips {
         border-left: 6px solid var(--military-green);
       }
-
       .kpi-card-custom.kpi-distance {
         border-left: 6px solid var(--emerald-green);
       }
-
       .kpi-card-custom.kpi-fuel {
         border-left: 6px solid var(--amber-orange);
       }
@@ -136,18 +127,6 @@
       .kpi-value {
         font-size: 2.1rem;
         font-weight: 700;
-      }
-
-      .kpi-trips .kpi-value {
-        color: var(--military-green);
-      }
-
-      .kpi-distance .kpi-value {
-        color: var(--emerald-green);
-      }
-
-      .kpi-fuel .kpi-value {
-        color: var(--amber-orange);
       }
 
       .chart-container {
@@ -209,9 +188,14 @@
         border: none;
       }
 
-      .btn-edit:hover {
-        background-color: #b45309;
-        color: white;
+      /* Admin Panel Styling */
+      .admin-view {
+        display: none;
+      }
+
+      .admin-header {
+        background: linear-gradient(135deg, #2b1b18 0%, #442a24 100%);
+        border-bottom: 4px solid var(--accent-gold);
       }
     </style>
   </head>
@@ -223,183 +207,374 @@
         style="width: 3rem; height: 3rem"
         role="status"
       ></div>
-      <h5 class="mt-3 text-dark fw-semibold">กำลังโหลดข้อมูลแดชบอร์ด...</h5>
+      <h5 class="mt-3 text-dark fw-semibold">กำลังโหลดข้อมูลระบบ...</h5>
     </div>
 
-    <div class="dashboard-header text-center">
-      <div class="d-flex align-items-center justify-content-between mb-2">
-        <span class="unit-badge"
-          ><i class="fa-solid fa-shield-halved me-1"></i> กองพันทหารสารวัตรที่
-          31</span
+    <!-- MAIN DASHBOARD VIEW -->
+    <div id="mainDashboardView">
+      <div class="dashboard-header text-center">
+        <div
+          class="d-flex align-items-center justify-content-between mb-2 container-fluid"
+          style="max-width: 1240px"
         >
-        <span> </span>
-      </div>
-      <h3 class="fw-bold mb-1 text-white">
-        <i
-          class="fa-solid fa-truck-monster me-2"
-          style="color: var(--accent-gold)"
-        ></i
-        >ระบบจัดการและรายงานการใช้ยานยนต์
-      </h3>
-      <div id="userProfileTag" class="user-profile-badge d-none">
-        <i class="fa-solid fa-user-check text-warning"></i>
-        <span id="lblUserName">กำลังยืนยันตัวตน...</span>
-      </div>
-    </div>
-
-    <div class="container-fluid" style="max-width: 1240px">
-      <div class="filter-section">
-        <h6 class="fw-bold mb-3 text-success">
-          <i class="fa-solid fa-sliders me-2"></i>ตัวกรองข้อมูล
-        </h6>
-        <div class="row g-3">
-          <div class="col-md-3 col-6">
-            <label class="form-label small text-muted">ตั้งแต่วันที่</label>
-            <input
-              type="date"
-              id="filterStartDate"
-              class="form-control"
-              onchange="applyFilters()"
-            />
-          </div>
-          <div class="col-md-3 col-6">
-            <label class="form-label small text-muted">ถึงวันที่</label>
-            <input
-              type="date"
-              id="filterEndDate"
-              class="form-control"
-              onchange="applyFilters()"
-            />
-          </div>
-          <div class="col-md-3 col-12">
-            <label class="form-label small text-muted">เลือกคันรถ</label>
-            <select
-              id="filterVehicle"
-              class="form-select"
-              onchange="applyFilters()"
-            >
-              <option value="ALL">รวมทุกคัน</option>
-            </select>
-          </div>
-          <div class="col-md-3 col-12">
-            <label class="form-label small text-muted">ค้นหาสถานที่</label>
-            <input
-              type="text"
-              id="filterLocation"
-              class="form-control"
-              placeholder="พิมพ์ชื่อสถานที่..."
-              onkeyup="applyFilters()"
-            />
-          </div>
+          <span class="unit-badge"
+            ><i class="fa-solid fa-shield-halved me-1"></i> กองพันทหารสารวัตรที่
+            31</span
+          >
+          <button
+            id="btnOpenAdmin"
+            class="btn btn-warning btn-sm fw-semibold d-none"
+            onclick="switchView('admin')"
+          >
+            <i class="fa-solid fa-screwdriver-wrench me-1"></i>
+            ระบบผู้ดูแลระบบ (Admin)
+          </button>
+        </div>
+        <h3 class="fw-bold mb-1 text-white">
+          <i
+            class="fa-solid fa-truck-monster me-2"
+            style="color: var(--accent-gold)"
+          ></i
+          >ระบบจัดการและรายงานการใช้ยานยนต์
+        </h3>
+        <div id="userProfileTag" class="user-profile-badge d-none">
+          <i class="fa-solid fa-user-check text-warning"></i>
+          <span id="lblUserName">กำลังยืนยันตัวตน...</span>
         </div>
       </div>
 
-      <div class="row g-3 mb-2">
-        <div class="col-md-4 col-12">
-          <div class="card kpi-card-custom kpi-trips">
-            <div>
-              <div class="small text-muted">จำนวนการใช้งาน</div>
-              <div class="kpi-value" id="kpiTrips">0</div>
-              <div class="fs-6 text-muted fw-normal">รอบ</div>
+      <div class="container-fluid" style="max-width: 1240px">
+        <div class="filter-section">
+          <h6 class="fw-bold mb-3 text-success">
+            <i class="fa-solid fa-sliders me-2"></i>ตัวกรองข้อมูล
+          </h6>
+          <div class="row g-3">
+            <div class="col-md-3 col-6">
+              <label class="form-label small text-muted">ตั้งแต่วันที่</label>
+              <input
+                type="date"
+                id="filterStartDate"
+                class="form-control"
+                onchange="applyFilters()"
+              />
             </div>
-            <div class="fs-2 text-success">
-              <i class="fa-solid fa-route"></i>
+            <div class="col-md-3 col-6">
+              <label class="form-label small text-muted">ถึงวันที่</label>
+              <input
+                type="date"
+                id="filterEndDate"
+                class="form-control"
+                onchange="applyFilters()"
+              />
             </div>
-          </div>
-        </div>
-        <div class="col-md-4 col-6">
-          <div class="card kpi-card-custom kpi-distance">
-            <div>
-              <div class="small text-muted">ระยะทางรวม</div>
-              <div class="kpi-value" id="kpiDistance">0</div>
-              <div class="fs-6 text-muted fw-normal">กม.</div>
-            </div>
-            <div class="fs-2 text-success">
-              <i class="fa-solid fa-gauge-high"></i>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4 col-6">
-          <div class="card kpi-card-custom kpi-fuel">
-            <div>
-              <div class="small text-muted">น้ำมันเชื้อเพลิงรวม</div>
-              <div class="kpi-value" id="kpiFuel">0</div>
-              <div class="fs-6 text-muted fw-normal">ลิตร</div>
-            </div>
-            <div class="fs-2 text-warning">
-              <i class="fa-solid fa-gas-pump"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row g-3">
-        <div class="col-md-8 col-12">
-          <div class="card p-3 h-100">
-            <h6 class="fw-bold mb-3 text-dark">
-              <i class="fa-solid fa-chart-column me-2"></i>ระยะทางแยกตามรถ
-              (กิโลเมตร)
-            </h6>
-            <div class="chart-container">
-              <canvas id="vehicleChart"></canvas>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4 col-12">
-          <div class="card p-3 h-100">
-            <h6 class="fw-bold mb-3 text-dark">
-              <i class="fa-solid fa-chart-pie me-2"></i>5 อันดับ
-              สถานที่เดินทางบ่อย
-            </h6>
-            <div class="chart-container">
-              <canvas id="locationChart"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row mt-3">
-        <div class="col-12">
-          <div class="card p-3">
-            <h6 class="fw-bold mb-3">
-              <i class="fa-solid fa-list-ul me-2"></i>รายละเอียดการใช้รถ
-            </h6>
-            <div class="table-responsive table-container">
-              <table class="table table-hover align-middle mb-0">
-                <thead>
-                  <tr>
-                    <th>วันที่</th>
-                    <th>เวลา ออก-เข้า</th>
-                    <th>ทะเบียนรถ</th>
-                    <th>พลขับ</th>
-                    <th>สถานที่</th>
-                    <th class="text-end">ระยะทาง (กม.)</th>
-                    <th class="text-end">น้ำมัน (ลิตร)</th>
-                    <th id="thAction" class="text-center d-none">จัดการ</th>
-                  </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-              </table>
-            </div>
-
-            <div
-              class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2"
-            >
-              <small class="text-muted" id="paginationInfo"
-                >แสดง 0 ถึง 0 จากทั้งหมด 0 รายการ</small
+            <div class="col-md-3 col-12">
+              <label class="form-label small text-muted">เลือกคันรถ</label>
+              <select
+                id="filterVehicle"
+                class="form-select"
+                onchange="applyFilters()"
               >
-              <nav>
-                <ul
-                  class="pagination pagination-sm mb-0"
-                  id="paginationNav"
-                ></ul>
-              </nav>
+                <option value="ALL">รวมทุกคัน</option>
+              </select>
+            </div>
+            <div class="col-md-3 col-12">
+              <label class="form-label small text-muted">ค้นหาสถานที่</label>
+              <input
+                type="text"
+                id="filterLocation"
+                class="form-control"
+                placeholder="พิมพ์ชื่อสถานที่..."
+                onkeyup="applyFilters()"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-2">
+          <div class="col-md-4 col-12">
+            <div class="card kpi-card-custom kpi-trips">
+              <div>
+                <div class="small text-muted">จำนวนการใช้งาน</div>
+                <div class="kpi-value" id="kpiTrips">0</div>
+                <div class="fs-6 text-muted fw-normal">รอบ</div>
+              </div>
+              <div class="fs-2 text-success">
+                <i class="fa-solid fa-route"></i>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 col-6">
+            <div class="card kpi-card-custom kpi-distance">
+              <div>
+                <div class="small text-muted">ระยะทางรวม</div>
+                <div class="kpi-value" id="kpiDistance">0</div>
+                <div class="fs-6 text-muted fw-normal">กม.</div>
+              </div>
+              <div class="fs-2 text-success">
+                <i class="fa-solid fa-gauge-high"></i>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 col-6">
+            <div class="card kpi-card-custom kpi-fuel">
+              <div>
+                <div class="small text-muted">น้ำมันเชื้อเพลิงรวม</div>
+                <div class="kpi-value" id="kpiFuel">0</div>
+                <div class="fs-6 text-muted fw-normal">ลิตร</div>
+              </div>
+              <div class="fs-2 text-warning">
+                <i class="fa-solid fa-gas-pump"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-8 col-12">
+            <div class="card p-3 h-100">
+              <h6 class="fw-bold mb-3 text-dark">
+                <i class="fa-solid fa-chart-column me-2"></i>ระยะทางแยกตามรถ
+                (กิโลเมตร)
+              </h6>
+              <div class="chart-container">
+                <canvas id="vehicleChart"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4 col-12">
+            <div class="card p-3 h-100">
+              <h6 class="fw-bold mb-3 text-dark">
+                <i class="fa-solid fa-chart-pie me-2"></i>5 อันดับ
+                สถานที่เดินทางบ่อย
+              </h6>
+              <div class="chart-container">
+                <canvas id="locationChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-12">
+            <div class="card p-3">
+              <h6 class="fw-bold mb-3">
+                <i class="fa-solid fa-list-ul me-2"></i>รายละเอียดการใช้รถ
+              </h6>
+              <div class="table-responsive table-container">
+                <table class="table table-hover align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th>วันที่</th>
+                      <th>เวลา ออก-เข้า</th>
+                      <th>ทะเบียนรถ</th>
+                      <th>พลขับ</th>
+                      <th>สถานที่</th>
+                      <th class="text-end">ระยะทาง (กม.)</th>
+                      <th class="text-end">น้ำมัน (ลิตร)</th>
+                      <th id="thAction" class="text-center d-none">จัดการ</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableBody"></tbody>
+                </table>
+              </div>
+
+              <div
+                class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2"
+              >
+                <small class="text-muted" id="paginationInfo"
+                  >แสดง 0 ถึง 0 จากทั้งหมด 0 รายการ</small
+                >
+                <nav>
+                  <ul
+                    class="pagination pagination-sm mb-0"
+                    id="paginationNav"
+                  ></ul>
+                </nav>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- ADMIN MANAGEMENT VIEW -->
+    <div id="adminDashboardView" class="admin-view">
+      <div class="dashboard-header admin-header text-center">
+        <div
+          class="d-flex align-items-center justify-content-between mb-2 container-fluid"
+          style="max-width: 1240px"
+        >
+          <span class="unit-badge" style="border-color: var(--accent-gold)"
+            ><i class="fa-solid fa-lock me-1"></i> ผู้ดูแลระบบ (Admin
+            Panel)</span
+          >
+          <button
+            class="btn btn-outline-light btn-sm fw-semibold"
+            onclick="switchView('main')"
+          >
+            <i class="fa-solid fa-arrow-left me-1"></i> กลับหน้าแดชบอร์ดหลัก
+          </button>
+        </div>
+        <h3 class="fw-bold mb-1 text-white">
+          <i class="fa-solid fa-gear me-2" style="color: var(--accent-gold)"></i
+          >ระบบจัดการฐานข้อมูลผู้ดูแลระบบ
+        </h3>
+      </div>
+
+      <div class="container-fluid" style="max-width: 1240px">
+        <!-- Tabs Navigation -->
+        <ul class="nav nav-tabs mb-3" id="adminTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link active fw-semibold text-success"
+              id="users-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#usersPane"
+              type="button"
+            >
+              <i class="fa-solid fa-users me-1"></i> ผู้ใช้งานระบบ (Users)
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link fw-semibold text-success"
+              id="drivers-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#driversPane"
+              type="button"
+            >
+              <i class="fa-solid fa-id-card me-1"></i> พลขับ (Drivers)
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button
+              class="nav-link fw-semibold text-success"
+              id="vehicles-tab"
+              data-bs-toggle="tab"
+              data-bs-target="#vehiclesPane"
+              type="button"
+            >
+              <i class="fa-solid fa-truck me-1"></i> รายการรถ (Vehicles)
+            </button>
+          </li>
+        </ul>
+
+        <div class="tab-content" id="adminTabContent">
+          <!-- USERS PANE -->
+          <div class="tab-pane fade show active" id="usersPane">
+            <div class="card p-3">
+              <div
+                class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2"
+              >
+                <h5 class="fw-bold text-success mb-0">ตารางผู้ใช้งานระบบ</h5>
+                <input
+                  type="text"
+                  id="searchUsers"
+                  class="form-control w-auto"
+                  placeholder="ค้นหาผู้ใช้..."
+                  onkeyup="renderAdminTable('users')"
+                />
+              </div>
+              <div class="table-responsive table-container">
+                <table class="table table-hover align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th>Line User ID</th>
+                      <th>ชื่อ</th>
+                      <th>บทบาท</th>
+                      <th>สิทธิ์ (right_to_adapt)</th>
+                      <th>วันที่สร้าง</th>
+                      <th class="text-center">จัดการ</th>
+                    </tr>
+                  </thead>
+                  <tbody id="usersTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- DRIVERS PANE -->
+          <div class="tab-pane fade" id="driversPane">
+            <div class="card p-3">
+              <div
+                class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2"
+              >
+                <h5 class="fw-bold text-success mb-0">ตารางพลขับ</h5>
+                <div class="d-flex gap-2">
+                  <input
+                    type="text"
+                    id="searchDrivers"
+                    class="form-control w-auto"
+                    placeholder="ค้นหาพลขับ..."
+                    onkeyup="renderAdminTable('drivers')"
+                  />
+                  <button
+                    class="btn btn-success btn-sm"
+                    onclick="openAdminModal('drivers', 'add')"
+                  >
+                    <i class="fa-solid fa-plus me-1"></i> เพิ่มพลขับ
+                  </button>
+                </div>
+              </div>
+              <div class="table-responsive table-container">
+                <table class="table table-hover align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th>ชื่อ - นามสกุล</th>
+                      <th>ยศ</th>
+                      <th>เบอร์โทร</th>
+                      <th class="text-center">จัดการ</th>
+                    </tr>
+                  </thead>
+                  <tbody id="driversTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- VEHICLES PANE -->
+          <div class="tab-pane fade" id="vehiclesPane">
+            <div class="card p-3">
+              <div
+                class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2"
+              >
+                <h5 class="fw-bold text-success mb-0">ตารางรายการรถ</h5>
+                <div class="d-flex gap-2">
+                  <input
+                    type="text"
+                    id="searchVehicles"
+                    class="form-control w-auto"
+                    placeholder="ค้นหารถ..."
+                    onkeyup="renderAdminTable('vehicles')"
+                  />
+                  <button
+                    class="btn btn-success btn-sm"
+                    onclick="openAdminModal('vehicles', 'add')"
+                  >
+                    <i class="fa-solid fa-plus me-1"></i> เพิ่มรถ
+                  </button>
+                </div>
+              </div>
+              <div class="table-responsive table-container">
+                <table class="table table-hover align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th>ชนิดรถ</th>
+                      <th>หมายเลขทะเบียน</th>
+                      <th>อัตราสิ้นเปลือง (กม./ลิตร)</th>
+                      <th class="text-center">จัดการ</th>
+                    </tr>
+                  </thead>
+                  <tbody id="vehiclesTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Modal for Main Dashboard -->
     <div class="modal fade" id="editModal" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content" style="border-radius: 16px">
@@ -421,7 +596,6 @@
             <form id="editForm">
               <input type="hidden" id="editSheetName" />
               <input type="hidden" id="editRowIndex" />
-
               <div class="row g-2">
                 <div class="col-md-6 col-12 mb-2">
                   <label class="form-label small"
@@ -443,13 +617,11 @@
                     class="form-control"
                     list="vehicleList"
                     id="editVehicle"
-                    placeholder="เลือกหรือพิมพ์ค้นหา..."
                     required
                     oninput="calculateDistanceAndFuel()"
                   />
                   <datalist id="vehicleList"></datalist>
                 </div>
-
                 <div class="col-12 mb-2">
                   <label class="form-label small"
                     >ยศ นาม (พลขับ) <span class="text-danger">*</span></label
@@ -458,46 +630,28 @@
                     class="form-control"
                     list="driverList"
                     id="editDriver"
-                    placeholder="เลือกจากรายการ หรือพิมพ์เพิ่ม..."
                     required
                   />
                   <datalist id="driverList"></datalist>
                 </div>
-
                 <div class="col-12 mb-2">
-                  <label class="form-label small"
-                    >สถานที่ปฏิบัติภารกิจ / ตำบลเดินทาง</label
-                  >
+                  <label class="form-label small">สถานที่ปฏิบัติภารกิจ</label>
                   <input
                     type="text"
                     id="editDestinations"
                     class="form-control"
                   />
                 </div>
-
                 <div class="col-6 mb-2">
                   <label class="form-label small">เวลาออก</label>
-                  <input
-                    type="text"
-                    id="editTimeOut"
-                    class="form-control"
-                    placeholder="08:00"
-                  />
+                  <input type="text" id="editTimeOut" class="form-control" />
                 </div>
                 <div class="col-6 mb-2">
                   <label class="form-label small">เวลากลับ</label>
-                  <input
-                    type="text"
-                    id="editTimeIn"
-                    class="form-control"
-                    placeholder="16:30"
-                  />
+                  <input type="text" id="editTimeIn" class="form-control" />
                 </div>
-
                 <div class="col-6 mb-2">
-                  <label class="form-label small"
-                    >เลขไมล์ออก (km) <span class="text-danger">*</span></label
-                  >
+                  <label class="form-label small">เลขไมล์ออก (km)</label>
                   <input
                     type="number"
                     step="any"
@@ -508,9 +662,7 @@
                   />
                 </div>
                 <div class="col-6 mb-2">
-                  <label class="form-label small"
-                    >เลขไมล์เข้า (km) <span class="text-danger">*</span></label
-                  >
+                  <label class="form-label small">เลขไมล์เข้า (km)</label>
                   <input
                     type="number"
                     step="any"
@@ -520,29 +672,22 @@
                     oninput="calculateDistanceAndFuel()"
                   />
                 </div>
-
                 <div class="col-6 mb-2">
-                  <label class="form-label small fw-semibold text-success"
-                    >ระยะทางคำนวณอัตโนมัติ (km)</label
-                  >
+                  <label class="form-label small text-success">ระยะทาง</label>
                   <input
                     type="number"
                     id="editDistance"
                     class="form-control text-success"
                     readonly
-                    placeholder="คำนวณอัตโนมัติ"
                   />
                 </div>
                 <div class="col-6 mb-2">
-                  <label class="form-label small fw-semibold text-warning"
-                    >ปริมาณน้ำมันคำนวณอัตโนมัติ (ลิตร)</label
-                  >
+                  <label class="form-label small text-warning">น้ำมัน</label>
                   <input
                     type="number"
                     id="editFuel"
                     class="form-control text-warning"
                     readonly
-                    placeholder="คำนวณอัตโนมัติ"
                   />
                 </div>
               </div>
@@ -561,7 +706,49 @@
               class="btn btn-sm btn-success px-3"
               onclick="submitEditData()"
             >
-              <i class="fa-solid fa-floppy-disk me-1"></i>บันทึกข้อมูล
+              บันทึก
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Universal Modal (Add/Edit) -->
+    <div class="modal fade" id="adminModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px">
+          <div class="modal-header bg-success text-white">
+            <h6 class="modal-title fw-bold" id="adminModalTitle">
+              จัดการข้อมูล
+            </h6>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="adminForm">
+              <input type="hidden" id="admTable" />
+              <input type="hidden" id="admMode" />
+              <input type="hidden" id="admRowIndex" />
+              <div id="adminFormFields"></div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-sm btn-light"
+              data-bs-dismiss="modal"
+            >
+              ยกเลิก
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm btn-success px-3"
+              onclick="submitAdminForm()"
+            >
+              บันทึก
             </button>
           </div>
         </div>
@@ -573,7 +760,7 @@
 
     <script>
       const API_URL =
-        "https://script.google.com/macros/s/AKfycbybki6qA9Xt0TxazrM8rtGNBc_41BSCU_QkA7yjgqm_q9BjwTa4VZRAILRr3h4cwOlq/exec";
+        "https://script.google.com/macros/s/AKfycbyMCE9qBpY5eXv0UXmNNqumzgHFsr_jqx1OXwc7p_sg_L0NOfHok5Gn_H9XwPvzV3WE/exec";
       const LIFF_ID = "2012018514-L8178qoX";
 
       let FUEL_CONSUMPTION_RATES = {};
@@ -585,12 +772,8 @@
       let currentPage = 1;
       const itemsPerPage = 25;
 
-      let userState = {
-        lineUserId: "",
-        canEdit: false,
-        name: "",
-        role: "",
-      };
+      let adminDataCache = { users: [], drivers: [], vehicles: [] };
+      let userState = { lineUserId: "", canEdit: false, name: "", role: "" };
 
       const chartColors = [
         "#294424",
@@ -610,7 +793,6 @@
         initAuthAndLoadData();
       });
 
-      // ดึงข้อมูลโปรไฟล์ LINE พร้อมๆ กับการโหลด Dashboard ครั้งเดียว
       function initAuthAndLoadData() {
         liff
           .init({ liffId: LIFF_ID })
@@ -622,20 +804,14 @@
                   userState.lineUserId = profile.userId;
                   fetchDashboardData(profile.userId, profile.displayName);
                 })
-                .catch((err) => {
-                  fetchDashboardData();
-                });
+                .catch((err) => fetchDashboardData());
             } else {
               liff.login();
             }
           })
-          .catch((err) => {
-            console.log("LIFF Initialization failed", err);
-            fetchDashboardData();
-          });
+          .catch((err) => fetchDashboardData());
       }
 
-      // ส่ง Request ครั้งเดียวได้ทั้งข้อมูล Dashboard และ สิทธิ์
       function fetchDashboardData(userId = "", displayName = "") {
         let url = API_URL;
         if (userId) {
@@ -643,21 +819,23 @@
         }
 
         fetch(url)
-          .then((response) => response.json())
+          .then((res) => res.json())
           .then((response) => {
             onDataReceived(response);
           })
           .catch((error) => {
             document.getElementById("loadingOverlay").style.display = "none";
-            alert("เกิดข้อผิดพลาดในการดึงข้อมูล: " + error.message);
+            Swal.fire(
+              "เกิดข้อผิดพลาด",
+              "ไม่สามารถดึงข้อมูล: " + error.message,
+              "error",
+            );
           });
       }
 
       function onDataReceived(response) {
         if (response.status === "success") {
           rawData = response.data;
-
-          // แสดงสิทธิ์การแก้ไขข้อมูล
           if (response.canEdit !== undefined) {
             userState.canEdit = response.canEdit;
             if (response.user) {
@@ -670,6 +848,9 @@
                 .classList.remove("d-none");
             }
             if (response.canEdit) {
+              document
+                .getElementById("btnOpenAdmin")
+                .classList.remove("d-none");
               document.getElementById("thAction").classList.remove("d-none");
             }
           }
@@ -683,10 +864,229 @@
           applyFilters();
           document.getElementById("loadingOverlay").style.display = "none";
         } else {
-          alert("เกิดข้อผิดพลาด: " + response.message);
+          Swal.fire("เกิดข้อผิดพลาด", response.message, "error");
         }
       }
 
+      function switchView(view) {
+        if (view === "admin") {
+          document.getElementById("mainDashboardView").style.display = "none";
+          document.getElementById("adminDashboardView").style.display = "block";
+          loadAdminData();
+        } else {
+          document.getElementById("adminDashboardView").style.display = "none";
+          document.getElementById("mainDashboardView").style.display = "block";
+          fetchDashboardData(userState.lineUserId, userState.name);
+        }
+      }
+
+      function loadAdminData() {
+        document.getElementById("loadingOverlay").style.display = "flex";
+        fetch(`${API_URL}?action=getAdminData`)
+          .then((res) => res.json())
+          .then((res) => {
+            document.getElementById("loadingOverlay").style.display = "none";
+            if (res.status === "success") {
+              adminDataCache.users = res.users;
+              adminDataCache.drivers = res.drivers;
+              adminDataCache.vehicles = res.vehicles;
+              renderAdminTable("users");
+              renderAdminTable("drivers");
+              renderAdminTable("vehicles");
+            }
+          })
+          .catch((err) => {
+            document.getElementById("loadingOverlay").style.display = "none";
+            Swal.fire("Error", "โหลดข้อมูล Admin ไม่สำเร็จ", "error");
+          });
+      }
+
+      function renderAdminTable(tableType) {
+        const searchVal = document
+          .getElementById(
+            `search${tableType.charAt(0).toUpperCase() + tableType.slice(1)}`,
+          )
+          .value.toLowerCase();
+        const tbody = document.getElementById(`${tableType}TableBody`);
+        const items = adminDataCache[tableType].filter((item) => {
+          return Object.values(item).some((val) =>
+            String(val).toLowerCase().includes(searchVal),
+          );
+        });
+
+        tbody.innerHTML = "";
+        if (items.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">ไม่พบข้อมูล</td></tr>`;
+          return;
+        }
+
+        items.forEach((item) => {
+          let tr = document.createElement("tr");
+          if (tableType === "users") {
+            tr.innerHTML = `
+              <td><small>${item.lineUserId}</small></td>
+              <td>${item.name}</td>
+              <td>${item.role}</td>
+              <td><span class="badge ${item.rightToAdapt === "active" ? "bg-success" : "bg-secondary"}">${item.rightToAdapt}</span></td>
+              <td>${item.createdAt}</td>
+              <td class="text-center">
+                <button class="btn btn-sm btn-warning py-0 px-2" onclick="openAdminModal('users', 'edit', ${item.rowIndex})"><i class="fa-solid fa-pen"></i> แก้ไข</button>
+              </td>`;
+          } else if (tableType === "drivers") {
+            tr.innerHTML = `
+              <td>${item.name}</td>
+              <td>${item.rank}</td>
+              <td>${item.phone}</td>
+              <td class="text-center">
+                <button class="btn btn-sm btn-warning py-0 px-2 me-1" onclick="openAdminModal('drivers', 'edit', ${item.rowIndex})"><i class="fa-solid fa-pen"></i></button>
+                <button class="btn btn-sm btn-danger py-0 px-2" onclick="confirmDelete('drivers', ${item.rowIndex})"><i class="fa-solid fa-trash"></i></button>
+              </td>`;
+          } else if (tableType === "vehicles") {
+            tr.innerHTML = `
+              <td>${item.name}</td>
+              <td>${item.license}</td>
+              <td>${item.rate}</td>
+              <td class="text-center">
+                <button class="btn btn-sm btn-warning py-0 px-2 me-1" onclick="openAdminModal('vehicles', 'edit', ${item.rowIndex})"><i class="fa-solid fa-pen"></i></button>
+                <button class="btn btn-sm btn-danger py-0 px-2" onclick="confirmDelete('vehicles', ${item.rowIndex})"><i class="fa-solid fa-trash"></i></button>
+              </td>`;
+          }
+          tbody.appendChild(tr);
+        });
+      }
+
+      function openAdminModal(table, mode, rowIndex = null) {
+        document.getElementById("admTable").value = table;
+        document.getElementById("admMode").value = mode;
+        document.getElementById("admRowIndex").value = rowIndex || "";
+
+        let title = "";
+        let html = "";
+        let data = {};
+
+        if (rowIndex) {
+          data = adminDataCache[table].find((i) => i.rowIndex === rowIndex);
+        }
+
+        if (table === "users") {
+          title = "แก้ไขสิทธิ์ผู้ใช้งานระบบ";
+          html = `
+            <div class="mb-2"><label class="form-label small">ชื่อ</label><input type="text" id="admName" class="form-control" value="${data.name || ""}" required></div>
+            <div class="mb-2"><label class="form-label small">บทบาท</label><input type="text" id="admRole" class="form-control" value="${data.role || ""}" required></div>
+            <div class="mb-2"><label class="form-label small">สิทธิ์ (right_to_adapt)</label>
+              <select id="admRight" class="form-select">
+                <option value="active" ${data.rightToAdapt === "active" ? "selected" : ""}>active</option>
+                <option value="inactive" ${data.rightToAdapt === "inactive" ? "selected" : ""}>inactive</option>
+              </select>
+            </div>`;
+        } else if (table === "drivers") {
+          title = mode === "add" ? "เพิ่มพลขับใหม่" : "แก้ไขข้อมูลพลขับ";
+          html = `
+            <div class="mb-2"><label class="form-label small">ชื่อ - นามสกุล</label><input type="text" id="admName" class="form-control" value="${data.name || ""}" required></div>
+            <div class="mb-2"><label class="form-label small">ยศ</label><input type="text" id="admRank" class="form-control" value="${data.rank || ""}"></div>
+            <div class="mb-2"><label class="form-label small">เบอร์โทร</label><input type="text" id="admPhone" class="form-control" value="${data.phone || ""}"></div>`;
+        } else if (table === "vehicles") {
+          title = mode === "add" ? "เพิ่มรายการรถใหม่" : "แก้ไขรายการรถ";
+          html = `
+            <div class="mb-2"><label class="form-label small">ชนิดรถ</label><input type="text" id="admName" class="form-control" value="${data.name || ""}" required></div>
+            <div class="mb-2"><label class="form-label small">หมายเลขทะเบียน</label><input type="text" id="admLicense" class="form-control" value="${data.license || ""}" required></div>
+            <div class="mb-2"><label class="form-label small">อัตราสิ้นเปลือง (กม./ลิตร)</label><input type="number" step="any" id="admRate" class="form-control" value="${data.rate || ""}" required></div>`;
+        }
+
+        document.getElementById("adminModalTitle").innerText = title;
+        document.getElementById("adminFormFields").innerHTML = html;
+        new bootstrap.Modal(document.getElementById("adminModal")).show();
+      }
+
+      function submitAdminForm() {
+        const table = document.getElementById("admTable").value;
+        const mode = document.getElementById("admMode").value;
+        const rowIndex = document.getElementById("admRowIndex").value;
+
+        let payload = {
+          action: "adminAction",
+          table: table,
+          mode: mode,
+          rowIndex: rowIndex,
+        };
+        if (document.getElementById("admName"))
+          payload.name = document.getElementById("admName").value;
+        if (document.getElementById("admRole"))
+          payload.role = document.getElementById("admRole").value;
+        if (document.getElementById("admRight"))
+          payload.rightToAdapt = document.getElementById("admRight").value;
+        if (document.getElementById("admRank"))
+          payload.rank = document.getElementById("admRank").value;
+        if (document.getElementById("admPhone"))
+          payload.phone = document.getElementById("admPhone").value;
+        if (document.getElementById("admLicense"))
+          payload.license = document.getElementById("admLicense").value;
+        if (document.getElementById("admRate"))
+          payload.rate = document.getElementById("admRate").value;
+
+        Swal.fire({
+          title: "กำลังบันทึก...",
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading(),
+        });
+
+        let url = `${API_URL}?` + new URLSearchParams(payload).toString();
+        fetch(url)
+          .then((res) => res.json())
+          .then((res) => {
+            if (res.status === "success") {
+              Swal.fire({
+                icon: "success",
+                title: "สำเร็จ",
+                text: "บันทึกข้อมูลเรียบร้อยแล้ว",
+                timer: 1500,
+                showConfirmButton: false,
+              });
+              bootstrap.Modal.getInstance(
+                document.getElementById("adminModal"),
+              ).hide();
+              loadAdminData();
+            } else {
+              Swal.fire("เกิดข้อผิดพลาด", res.message, "error");
+            }
+          })
+          .catch((err) => Swal.fire("Error", err.message, "error"));
+      }
+
+      function confirmDelete(table, rowIndex) {
+        Swal.fire({
+          title: "คุณแน่ใจหรือไม่?",
+          text: "ต้องการลบข้อมูลนี้ออกจากระบบใช่หรือไม่?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "ใช่, ลบเลย",
+          cancelButtonText: "ยกเลิก",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            let url = `${API_URL}?action=adminAction&table=${table}&mode=delete&rowIndex=${rowIndex}`;
+            fetch(url)
+              .then((res) => res.json())
+              .then((res) => {
+                if (res.status === "success") {
+                  Swal.fire({
+                    icon: "success",
+                    title: "ลบสำเร็จ",
+                    text: "ย้ายสถานะเป็น delete เรียบร้อย",
+                    timer: 1200,
+                    showConfirmButton: false,
+                  });
+                  loadAdminData();
+                } else {
+                  Swal.fire("Error", res.message, "error");
+                }
+              });
+          }
+        });
+      }
+
+      // ส่วนฟังก์ชันหลัก Dashboard (Filter, Chart, Pagination)
       function populateDatalist(elementId, items) {
         const datalist = document.getElementById(elementId);
         datalist.innerHTML = "";
@@ -721,9 +1121,8 @@
       function parseFilterDate(dateStr) {
         if (!dateStr) return null;
         const parts = dateStr.split("-");
-        if (parts.length === 3) {
+        if (parts.length === 3)
           return new Date(parts[0], parts[1] - 1, parts[2]);
-        }
         return new Date(dateStr);
       }
 
@@ -738,7 +1137,6 @@
 
         const startDate = parseFilterDate(startInput);
         if (startDate) startDate.setHours(0, 0, 0, 0);
-
         const endDate = parseFilterDate(endInput);
         if (endDate) endDate.setHours(23, 59, 59, 999);
 
@@ -788,7 +1186,6 @@
         data.forEach((item) => {
           totalDistance += item.distance;
           totalFuel += item.fuel;
-
           if (item.vehicle)
             vehicleSummary[item.vehicle] =
               (vehicleSummary[item.vehicle] || 0) + item.distance;
@@ -847,7 +1244,6 @@
               item.timeOut && item.timeIn
                 ? `${item.timeOut} - ${item.timeIn}`
                 : "-";
-
             let actionCol = "";
             if (userState.canEdit) {
               actionCol = `<td class="text-center">
@@ -968,11 +1364,7 @@
         document.getElementById("editMileIn").value = item.mileIn || "";
 
         calculateDistanceAndFuel();
-
-        const editModal = new bootstrap.Modal(
-          document.getElementById("editModal"),
-        );
-        editModal.show();
+        new bootstrap.Modal(document.getElementById("editModal")).show();
       }
 
       function submitEditData() {
@@ -1025,14 +1417,21 @@
               bootstrap.Modal.getInstance(
                 document.getElementById("editModal"),
               ).hide();
+              Swal.fire({
+                icon: "success",
+                title: "สำเร็จ",
+                text: "บันทึกการแก้ไขเรียบร้อยแล้ว",
+                timer: 1500,
+                showConfirmButton: false,
+              });
               fetchDashboardData(userState.lineUserId, userState.name);
             } else {
-              alert("เกิดข้อผิดพลาด: " + res.message);
+              Swal.fire("เกิดข้อผิดพลาด", res.message, "error");
             }
           })
           .catch((error) => {
             document.getElementById("loadingOverlay").style.display = "none";
-            alert("เกิดข้อผิดพลาดในการบันทึก: " + error.message);
+            Swal.fire("เกิดข้อผิดพลาด", error.message, "error");
           });
       }
 
