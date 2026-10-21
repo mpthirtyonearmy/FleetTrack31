@@ -212,22 +212,23 @@
 
     <!-- MAIN DASHBOARD VIEW -->
     <div id="mainDashboardView">
+      <!-- MAIN DASHBOARD HEADER -->
       <div class="dashboard-header text-center">
         <div
-          class="d-flex align-items-center justify-content-between mb-2 container-fluid"
+          class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-3 gap-2 container-fluid"
           style="max-width: 1240px"
         >
-          <span class="unit-badge"
-            ><i class="fa-solid fa-shield-halved me-1"></i> กองพันทหารสารวัตรที่
-            31</span
-          >
+          <span class="unit-badge mb-0">
+            <i class="fa-solid fa-shield-halved me-1"></i> กองพันทหารสารวัตรที่
+            31
+          </span>
           <button
             id="btnOpenAdmin"
-            class="btn btn-warning btn-sm fw-semibold d-none"
+            class="btn btn-warning btn-sm fw-semibold d-none w-100 w-md-auto shadow-sm"
             onclick="switchView('admin')"
           >
-            <i class="fa-solid fa-screwdriver-wrench me-1"></i>
-            ระบบผู้ดูแลระบบ (Admin)
+            <i class="fa-solid fa-screwdriver-wrench me-1"></i> ระบบผู้ดูแลระบบ
+            (Admin)
           </button>
         </div>
         <h3 class="fw-bold mb-1 text-white">
@@ -240,6 +241,36 @@
         <div id="userProfileTag" class="user-profile-badge d-none">
           <i class="fa-solid fa-user-check text-warning"></i>
           <span id="lblUserName">กำลังยืนยันตัวตน...</span>
+        </div>
+      </div>
+
+      <!-- ADMIN DASHBOARD HEADER -->
+      <div id="adminDashboardView" class="admin-view">
+        <div class="dashboard-header admin-header text-center">
+          <div
+            class="d-flex flex-column flex-md-row align-items-center justify-content-between mb-3 gap-2 container-fluid"
+            style="max-width: 1240px"
+          >
+            <span
+              class="unit-badge mb-0"
+              style="border-color: var(--accent-gold)"
+            >
+              <i class="fa-solid fa-lock me-1"></i> ผู้ดูแลระบบ (Admin Panel)
+            </span>
+            <button
+              class="btn btn-outline-light btn-sm fw-semibold w-100 w-md-auto shadow-sm"
+              onclick="switchView('main')"
+            >
+              <i class="fa-solid fa-arrow-left me-1"></i> กลับหน้าแดชบอร์ดหลัก
+            </button>
+          </div>
+          <h3 class="fw-bold mb-1 text-white">
+            <i
+              class="fa-solid fa-gear me-2"
+              style="color: var(--accent-gold)"
+            ></i
+            >ระบบจัดการฐานข้อมูลผู้ดูแลระบบ
+          </h3>
         </div>
       </div>
 
@@ -423,38 +454,42 @@
 
       <div class="container-fluid" style="max-width: 1240px">
         <!-- Tabs Navigation -->
-        <ul class="nav nav-tabs mb-3" id="adminTabs" role="tablist">
+        <ul
+          class="nav nav-pills nav-fill mb-3 gap-2 shadow-sm p-2 bg-white rounded-4"
+          id="adminTabs"
+          role="tablist"
+        >
           <li class="nav-item" role="presentation">
             <button
-              class="nav-link active fw-semibold text-success"
+              class="nav-link active fw-semibold py-2 rounded-3"
               id="users-tab"
               data-bs-toggle="tab"
               data-bs-target="#usersPane"
               type="button"
             >
-              <i class="fa-solid fa-users me-1"></i> ผู้ใช้งานระบบ (Users)
+              <i class="fa-solid fa-users me-1"></i> ผู้ใช้งานระบบ
             </button>
           </li>
           <li class="nav-item" role="presentation">
             <button
-              class="nav-link fw-semibold text-success"
+              class="nav-link fw-semibold py-2 rounded-3 text-success border border-success-subtle"
               id="drivers-tab"
               data-bs-toggle="tab"
               data-bs-target="#driversPane"
               type="button"
             >
-              <i class="fa-solid fa-id-card me-1"></i> พลขับ (Drivers)
+              <i class="fa-solid fa-id-card me-1"></i> พลขับ
             </button>
           </li>
           <li class="nav-item" role="presentation">
             <button
-              class="nav-link fw-semibold text-success"
+              class="nav-link fw-semibold py-2 rounded-3 text-success border border-success-subtle"
               id="vehicles-tab"
               data-bs-toggle="tab"
               data-bs-target="#vehiclesPane"
               type="button"
             >
-              <i class="fa-solid fa-truck me-1"></i> รายการรถ (Vehicles)
+              <i class="fa-solid fa-truck me-1"></i> รายการรถ
             </button>
           </li>
         </ul>
@@ -482,7 +517,7 @@
                       <th>Line User ID</th>
                       <th>ชื่อ</th>
                       <th>บทบาท</th>
-                      <th>สิทธิ์ (right_to_adapt)</th>
+                      <th>สิทธิ์ในการแก้ไขข้อมูล</th>
                       <th>วันที่สร้าง</th>
                       <th class="text-center">จัดการ</th>
                     </tr>
@@ -512,7 +547,7 @@
                     class="btn btn-success btn-sm"
                     onclick="openAdminModal('drivers', 'add')"
                   >
-                    <i class="fa-solid fa-plus me-1"></i> เพิ่มพลขับ
+                    <i class="fa-solid fa-plus me-1"></i> เพิ่ม
                   </button>
                 </div>
               </div>
@@ -520,9 +555,7 @@
                 <table class="table table-hover align-middle mb-0">
                   <thead>
                     <tr>
-                      <th>ชื่อ - นามสกุล</th>
-                      <th>ยศ</th>
-                      <th>เบอร์โทร</th>
+                      <th>ยศ - ชื่อ - นามสกุล</th>
                       <th class="text-center">จัดการ</th>
                     </tr>
                   </thead>
@@ -551,7 +584,7 @@
                     class="btn btn-success btn-sm"
                     onclick="openAdminModal('vehicles', 'add')"
                   >
-                    <i class="fa-solid fa-plus me-1"></i> เพิ่มรถ
+                    <i class="fa-solid fa-plus me-1"></i> เพิ่ม
                   </button>
                 </div>
               </div>
@@ -935,8 +968,6 @@
           } else if (tableType === "drivers") {
             tr.innerHTML = `
               <td>${item.name}</td>
-              <td>${item.rank}</td>
-              <td>${item.phone}</td>
               <td class="text-center">
                 <button class="btn btn-sm btn-warning py-0 px-2 me-1" onclick="openAdminModal('drivers', 'edit', ${item.rowIndex})"><i class="fa-solid fa-pen"></i></button>
                 <button class="btn btn-sm btn-danger py-0 px-2" onclick="confirmDelete('drivers', ${item.rowIndex})"><i class="fa-solid fa-trash"></i></button>
@@ -982,9 +1013,7 @@
         } else if (table === "drivers") {
           title = mode === "add" ? "เพิ่มพลขับใหม่" : "แก้ไขข้อมูลพลขับ";
           html = `
-            <div class="mb-2"><label class="form-label small">ชื่อ - นามสกุล</label><input type="text" id="admName" class="form-control" value="${data.name || ""}" required></div>
-            <div class="mb-2"><label class="form-label small">ยศ</label><input type="text" id="admRank" class="form-control" value="${data.rank || ""}"></div>
-            <div class="mb-2"><label class="form-label small">เบอร์โทร</label><input type="text" id="admPhone" class="form-control" value="${data.phone || ""}"></div>`;
+            <div class="mb-2"><label class="form-label small">ชื่อ - นามสกุล</label><input type="text" id="admName" class="form-control" value="${data.name || ""}" required></div>`;
         } else if (table === "vehicles") {
           title = mode === "add" ? "เพิ่มรายการรถใหม่" : "แก้ไขรายการรถ";
           html = `
@@ -1015,10 +1044,6 @@
           payload.role = document.getElementById("admRole").value;
         if (document.getElementById("admRight"))
           payload.rightToAdapt = document.getElementById("admRight").value;
-        if (document.getElementById("admRank"))
-          payload.rank = document.getElementById("admRank").value;
-        if (document.getElementById("admPhone"))
-          payload.phone = document.getElementById("admPhone").value;
         if (document.getElementById("admLicense"))
           payload.license = document.getElementById("admLicense").value;
         if (document.getElementById("admRate"))
@@ -1061,7 +1086,7 @@
           showCancelButton: true,
           confirmButtonColor: "#d33",
           cancelButtonColor: "#3085d6",
-          confirmButtonText: "ใช่, ลบเลย",
+          confirmButtonText: "ตกลง",
           cancelButtonText: "ยกเลิก",
         }).then((result) => {
           if (result.isConfirmed) {
